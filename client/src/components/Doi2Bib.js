@@ -87,7 +87,7 @@ class Doi2Bib extends Component {
       workInProgress: true
     });
 
-    idToSend = idToSend.replace(/ /g, '');
+    idToSend = idToSend.replace(/[^\x21-\x7E]/g, ''); // remove all non ASCII chars, including non-printable, and white spaces
 
     if (idToSend.match(/^(doi:|(https?:\/\/)?(dx\.)?doi\.org\/)?10\..+\/.+$/i)) {
       if (idToSend.match(/^doi:/i)) {
