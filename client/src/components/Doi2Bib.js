@@ -80,14 +80,16 @@ class Doi2Bib extends Component {
     let idToSend = this.state.value;
     let url;
 
+    // Remove all non-ASCII chars, including non-printable, and white spaces
+    idToSend = idToSend.replace(/[^\x21-\x7E]/g, '');
+
     this.setState({
+      value: idToSend,
       bib: null,
       url: null,
       error: null,
       workInProgress: true
     });
-
-    idToSend = idToSend.replace(/[^\x21-\x7E]/g, ''); // remove all non ASCII chars, including non-printable, and white spaces
 
     if (idToSend.match(/^(doi:|(https?:\/\/)?(dx\.)?doi\.org\/)?10\..+\/.+$/i)) {
       if (idToSend.match(/^doi:/i)) {
@@ -100,8 +102,22 @@ class Doi2Bib extends Component {
     } else if (idToSend.match(/^\d+$|^PMC\d+(\.\d+)?$/)) {
       url = '/8350e5a3e24c153df2275c9f80692773/pmid2bib';
     }
-    else if (idToSend.match(/^(arxiv:)?\d+\.\d+(v(\d+))?/i)) {
-      if (idToSend.match(/^arxiv:/i)) {
+    else if (idToSend.match(/^(?:(?:https?:\/\/)?(?:www\.)?arxiv\.org\/abs\/|arxiv[:\.])?(\d+\.\d+(?:v\d+)?)/i)) {
+      /*
+        allow :
+        * https://arxiv.org/abs/XXXX.XXXXX
+        * arxiv.org/abs/XXXX.XXXXX
+        * https://doi.org/10.48550/arXiv.XXXX.XXXXX
+        * doi.org/10.48550/arXiv.XXXX.XXXXX
+        * 10.48550/arXiv.XXXX.XXXXX
+        * arXiv.XXXX.XXXXX
+        * XXXX.XXXXX
+      */
+
+      // order of condition matter
+      if (idToSend.indexOf('arxiv.org/abs/') >= 0) {
+        idToSend = idToSend.split('/').pop();
+      } else if (idToSend.match(/^arxiv\./i)) {
         idToSend = idToSend.substring(6);
       }
       url = '/8350e5a3e24c153df2275c9f80692773/arxivid2bib';

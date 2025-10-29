@@ -4,6 +4,8 @@ const
   request = require('request'),
   parseString = require('xml2js').parseString;
 
+const ARXIV_BASE_DOI = "10.48550";
+
 function doi2bibOptions(doi) {
   return {
     url: 'https://doi.org/' + doi,
@@ -63,12 +65,20 @@ function arxivid2doi(arxivid) {
         reject(204);
       } else {
         parseString(body, function(err, result) {
-          if (err || !result.feed.entry[0]['arxiv:doi']) {
+          const entries = result.feed.entry;
+          if (err || !entries || !entries.length === 0) {
             reject(404);
-          } else {
-            var doi = result.feed.entry[0]['arxiv:doi'][0]._;
-            resolve(doi);
+            return;
           }
+
+          const entry = entries[0];
+          var doi = null;
+          if (entry['arxiv:doi']) { // external/original DOI (if exists)
+            doi = entry['arxiv:doi'][0]._;
+          } else { // only on arvix
+            doi = `${ARXIV_BASE_DOI}/arXiv.${arxivid}`;
+          }
+          resolve(doi);
         });
       }});
     });
