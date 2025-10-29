@@ -66,7 +66,7 @@ function arxivid2doi(arxivid) {
       } else {
         parseString(body, function(err, result) {
           const entries = result.feed.entry;
-          if (err || !entries || !entries.length === 0) {
+          if (err || !entries?.length) {
             reject(404);
             return;
           }
